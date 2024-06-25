@@ -5,6 +5,7 @@ import moment from 'moment';
 import axios from 'axios';
 import qs from 'qs';
 import {oauth2Client, SCOPES, outlookOptions} from './config/oauth.js'
+import { processEmails } from './tasks/emailProcessor.js';
 
 dotenv.config();
 const app = express();
@@ -59,6 +60,16 @@ app.get('/outlook/callback', async (req, res) => {
     }
     
 });
+
+app.post('/process-emails', async (req, res) => {
+    const {service, tokens} = req.body;
+    try {
+        await processEmails(service, tokens);
+        res.status(200).send('Emails processed successfully!')
+    } catch (error) {
+        res.status(500).send('Error processing emails: ', error.message);
+    }
+})
 
 
 app.listen(PORT, () => {
