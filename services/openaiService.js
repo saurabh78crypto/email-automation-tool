@@ -1,12 +1,20 @@
-import { Configuration, OpenAIApi } from 'openai';
+import axios from "axios";
 
-const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
-const openai = new OpenAIApi(configuration);
-
+const apiKey = process.env.OPENAI_API_KEY
 
 const categorizeEmail = async (email) => {
     const prompt = `Caategorize the following email: ${email.text}`;
-    const response = await openai.createCompletion({ model: 'text-davinci-003', prompt, max_tokens: 10 });
+    const response = await axios.post('https://api.openai.com/v1/completions', {
+        model: 'text-davinci-003',
+        prompt,
+        max_tokens: 10,
+    }, {
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
     return response.data.choices[0].text.trim();
 };
 
@@ -21,7 +29,16 @@ const generateReply = async (category, email) => {
         prompt = `Generate a reply asking for more information to the following email: ${email.text}`;
     }
 
-    const response = await openai.createCompletion({ model: 'text-davinci-003', max_tokens: 100 });
+    const response = await axios.post('https://api.openai.com/v1/completions', {
+        model: 'text-davinci-003',
+        prompt,
+        max_tokens: 100,
+    }, {
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        }
+    });
     return response.data.choices[0].text.trim();
 };
 
